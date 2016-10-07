@@ -59,8 +59,30 @@ eval (Cos a)   = cos (eval a)
 
 -- comments?
 
+type Parser a = String -> Maybe (a, String)
+
 readExpr :: String -> Maybe Expr
-readExpr = undefined
+readExpr s = case expr s of
+               Just(a, "") -> Just a
+               _           -> Nothing
+
+chain p op f s =
+   case p s of
+     Just (n,c:s')| c == op ->
+            case chain p op f s' of
+                Just (m,s'') -> Just (f n m,s'')
+                Nothing -> Just (n,c:s')
+     r -> r
+
+expr, term :: Parser Expr
+expr = chain term '+' Add
+term = chain factor '*' Mul
+
+factor :: Parser Expr
+factor ('(':s) =
+  case expr s of
+    Just (a, ')':s1) -> Just (a,s1)
+    _                -> Nothing
 
 -- E
 
