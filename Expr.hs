@@ -1,41 +1,41 @@
 module Expr where
---shame
+
 -- code between "----" markers are not part of the assignment
---shame
+
 --------------------------
 import Test.QuickCheck.Gen
 import System.Random
 --------------------------
---shame
+
 import Test.QuickCheck
---shame
+
 -- A
---shame
+
 -- Data types, need to add types for cos- and sin- functions?? 
---shame
+
 data Expr =  Num Float
            | Add Expr Expr
            | Mul Expr Expr
     deriving Eq
---shame
+
 -- B
---shame
+
 -- instance so we can show expressions
---shame
+
 instance Show Expr where
     show = showExpr
---shame
+
 showExpr :: Expr -> String
 showExpr (Num n)   = show n
 showExpr (Add a b) = showExpr a ++ " + " ++ showExpr b
 showExpr (Mul a b) = showExpr a ++ " * " ++ showExpr b
---shame
+
 {-
 showFactor :: Expr -> String
 showFactor (Add a b) = "(" ++ showExpr (Add a b) ++ ")"
 showFactor e         = showExpr e
 -}
---shame
+
 -- C
 
 eval :: Expr -> Float
