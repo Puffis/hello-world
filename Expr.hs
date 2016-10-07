@@ -1,5 +1,5 @@
 module Expr where
--- David du är snygg
+
 -- code between "----" markers are not part of the assignment
 
 --------------------------
@@ -8,6 +8,7 @@ import System.Random
 --------------------------
 
 import Test.QuickCheck
+import Data.List
 
 -- A
 
@@ -16,7 +17,11 @@ import Test.QuickCheck
 data Expr =  Num Float
            | Add Expr Expr
            | Mul Expr Expr
+           | Sin Expr
+           | Cos Expr
     deriving Eq
+
+type Name = String
 
 -- B
 
@@ -28,13 +33,18 @@ instance Show Expr where
 showExpr :: Expr -> String
 showExpr (Num n)   = show n
 showExpr (Add a b) = showExpr a ++ " + " ++ showExpr b
-showExpr (Mul a b) = showExpr a ++ " * " ++ showExpr b
+showExpr (Mul a b) = showFactor a ++ " * " ++ showFactor b
+showExpr (Sin a)   = "sin " ++ showTrig a
+showExpr (Cos a)   = "cos " ++ showTrig a
 
-{-
 showFactor :: Expr -> String
 showFactor (Add a b) = "(" ++ showExpr (Add a b) ++ ")"
 showFactor e         = showExpr e
--}
+
+showTrig :: Expr -> String
+showTrig (Add a b) = "(" ++ showExpr (Add a b) ++ ")"
+showTrig (Mul a b) = "(" ++ showExpr (Mul a b) ++ ")"
+showTrig e         = showExpr e
 
 -- C
 
@@ -42,6 +52,8 @@ eval :: Expr -> Float
 eval (Num n)   = n
 eval (Add a b) = eval a + eval b
 eval (Mul a b) = eval a * eval b
+eval (Sin a)   = sin (eval a)
+eval (Cos a)   = cos (eval a)
 
 -- D
 
