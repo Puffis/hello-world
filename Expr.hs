@@ -5,7 +5,7 @@ module Expr where
 --tjaaaaaaa spagheetiiii
 
 import Test.QuickCheck
-
+ test = 5 + 5
 --------------------------
 import Test.QuickCheck.Gen
 import System.Random
