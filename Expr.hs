@@ -2,26 +2,32 @@ module Expr where
 
 -- code between "----" markers are not part of the assignment
 
---------------------------
-import Test.QuickCheck.Gen
-import System.Random
---------------------------
-
 import Test.QuickCheck
 import Data.List
 
 -- A
 
--- Data types, need to add types for cos- and sin- functions?? 
+-- Data types, is "Var Name" correct?
 
 data Expr =  Num Float
            | Add Expr Expr
            | Mul Expr Expr
            | Sin Expr
            | Cos Expr
+           | Var Name
     deriving Eq
 
 type Name = String
+
+-- Do we need this when it's only going to be one variable, "x"?
+
+vars :: Expr -> [Name]
+vars (Num n)   = []
+vars (Add a b) = vars a `union` vars b
+vars (Mul a b) = vars a `union` vars b
+vars (Sin a)   = vars a -- Is this correct?
+vars (Cos a)   = vars a -- Is this correct?
+vars (Var x)   = [x]
 
 -- B
 
@@ -36,6 +42,7 @@ showExpr (Add a b) = showExpr a ++ " + " ++ showExpr b
 showExpr (Mul a b) = showFactor a ++ " * " ++ showFactor b
 showExpr (Sin a)   = "sin " ++ showTrig a
 showExpr (Cos a)   = "cos " ++ showTrig a
+showExpr (Var x) = show x -- Is this correct? probably not
 
 showFactor :: Expr -> String
 showFactor (Add a b) = "(" ++ showExpr (Add a b) ++ ")"
@@ -48,6 +55,8 @@ showTrig e         = showExpr e
 
 -- C
 
+-- How to make this look like eval :: Expr -> Double -> Double? How to add variable?
+
 eval :: Expr -> Float
 eval (Num n)   = n
 eval (Add a b) = eval a + eval b
@@ -56,8 +65,6 @@ eval (Sin a)   = sin (eval a)
 eval (Cos a)   = cos (eval a)
 
 -- D
-
--- comments?
 
 type Parser a = String -> Maybe (a, String)
 
@@ -86,47 +93,9 @@ factor ('(':s) =
 
 -- E
 
--- comments?
-
 -- prop_ShowReadExpr :: Expr -> Bool
 
 -- arbExpr :: Int -> Gen Expr
 
 -- instance Arbitrary Expr where
 --     arbitrary = sized arbExpr
-
-
---Random code from here and on, ignore!
-------------------------------------------------------
-
-questions :: IO ()
-questions = do
-            e <- generate arbitrary
-            putStr ("What is " ++ show e ++ "?")
-            ans <- getLine
-            putStrLn (if ans == show (eval e)
-                        then "Correct!" 
-                        else "Wrong!")
-
-generate :: Gen a -> IO a
-generate g = do
-    seed <- newStdGen
-    return (unGen g seed 10)
-
-instance Arbitrary Expr where
-    arbitrary = sized arbExpr
-
-arbExpr :: Int -> Gen Expr
-arbExpr s = 
-    frequency [(1, do n <- arbitrary
-                      return (Num n))
-              ,(s, do a <- arbExpr s'
-                      b <- arbExpr s'
-                      return (Add a b))
-              ,(s, do a <- arbExpr s'
-                      b <- arbExpr s'
-                      return (Mul a b)) ]
-    where
-      s' = s `div` 2
-
-------------------------------------------------------
