@@ -59,12 +59,25 @@ eval (Cos a)   = cos (eval a)
 
 -- comments?
 
+number :: Parser (Maybe Expr)
+number = fmap readFloat numberString
+
+readFloat = read :: String -> Maybe Expr
+
+numberString :: Parser String
+numberString = many1 digit
+
+
+{-
+
 type Parser a = String -> Maybe (a, String)
+
 
 readExpr :: String -> Maybe Expr
 readExpr s = case expr s of
                Just(a, "") -> Just a
                _           -> Nothing
+
 
 chain p op f s =
    case p s of
@@ -74,15 +87,45 @@ chain p op f s =
                 Nothing -> Just (n,c:s')
      r -> r
 
+
 expr, term :: Parser Expr
 expr = chain term '+' Add
 term = chain factor '*' Mul
 
+
 factor :: Parser Expr
-factor ('(':s) =
+factor ( '(' :s) =
   case expr s of
-    Just (a, ')':s1) -> Just (a,s1)
-    _                -> Nothing
+    Just (a, ')' :s1) -> Just (a,s1)
+    _                 -> Nothing
+
+
+factor s = num s
+
+
+num :: Parser Expr
+num s = case number s of
+    Just (n,s1) -> Just (Num n, s1)
+    Nothing     -> Nothing
+
+
+
+number :: Parser Float
+-- number "123+4" == Just(123,"+4")
+number ('-':cs) = case number cs of
+   Just(n,s) -> Just(-n, s)
+   _         -> Nothing
+
+
+number (c:cs) | isDigit c = Just (read digits,rest)
+  where
+  digits = c:takeWhile isDigit cs
+  rest   = dropWhile isDigit cs
+number _                  = Nothing
+
+-}
+
+
 
 -- E
 
