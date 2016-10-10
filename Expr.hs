@@ -1,9 +1,8 @@
 module Expr where
 
--- code between "----" markers are not part of the assignment
-
 import Test.QuickCheck
 import Data.List
+import Data.Char
 
 -- A
 
@@ -14,20 +13,10 @@ data Expr =  Num Float
            | Mul Expr Expr
            | Sin Expr
            | Cos Expr
-           | Var Name
+           | Var
     deriving Eq
 
 type Name = String
-
--- Do we need this when it's only going to be one variable, "x"?
-
-vars :: Expr -> [Name]
-vars (Num n)   = []
-vars (Add a b) = vars a `union` vars b
-vars (Mul a b) = vars a `union` vars b
-vars (Sin a)   = vars a -- Is this correct?
-vars (Cos a)   = vars a -- Is this correct?
-vars (Var x)   = [x]
 
 -- B
 
@@ -42,7 +31,7 @@ showExpr (Add a b) = showExpr a ++ " + " ++ showExpr b
 showExpr (Mul a b) = showFactor a ++ " * " ++ showFactor b
 showExpr (Sin a)   = "sin " ++ showTrig a
 showExpr (Cos a)   = "cos " ++ showTrig a
-showExpr (Var x) = show x -- Is this correct? probably not
+showExpr (Var)     = "x" -- ???
 
 showFactor :: Expr -> String
 showFactor (Add a b) = "(" ++ showExpr (Add a b) ++ ")"
@@ -90,6 +79,29 @@ factor ('(':s) =
   case expr s of
     Just (a, ')':s1) -> Just (a,s1)
     _                -> Nothing
+
+factor s = num s
+
+
+num :: Parser Expr
+num s = case number s of
+    Just (n,s1) -> Just (Num n, s1)
+    Nothing     -> Nothing
+
+
+
+number :: Parser Float
+-- number "123+4" == Just(123,"+4")
+number ('-':cs) = case number cs of
+   Just(n,s) -> Just(-n, s)
+   _         -> Nothing
+
+
+number (c:cs) | isDigit c = Just (read digits,rest)
+  where
+  digits = c:takeWhile isDigit cs
+  rest   = dropWhile isDigit cs
+number _                  = Nothing
 
 -- E
 
